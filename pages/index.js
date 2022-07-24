@@ -1,21 +1,46 @@
-import { Typography } from '@mui/material';
-import Head from 'next/head';
-import Image from 'next/image';
-import styles from '../styles/Home.module.css';
+import { Alert, CircularProgress, Grid, Typography } from '@mui/material';
+import { useEffect, useState } from 'react';
+import Layout from '../components/Layout';
+import ProductItem from '../components/ProductItem';
+import { client } from '../utils/client';
 
 export default function Home() {
-  return (
-    <div className={styles.container}>
-      <Head>
-        div
-        <title>HAWA MABATIKI</title>
-        <meta name="description" content="wauzaji wa batiki na nguo makini" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
+  const [state, setState] = useState({
+    products: [],
+    error: '',
+    loading: true,
+  });
 
-      <Typography component="h1" variant="h1">
-        HAWA mabatiki store
-      </Typography>
-    </div>
+  const { loading, error, products } = state;
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const products = await client.fetch(`*[_type == "product"]`);
+        setState({ products, loading: false });
+      } catch (error) {
+        setState({ loading: false, error: error.message });
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  return (
+    <Layout>
+      {loading ? (
+        <CircularProgress />
+      ) : error ? (
+        <Alert variant="danger">{error}</Alert>
+      ) : (
+        <Grid container spacing={3}>
+          {products.map((product) => (
+            <Grid item md={4} key={product.slug}>
+              <ProductItem product={product} />
+            </Grid>
+          ))}
+        </Grid>
+      )}
+    </Layout>
   );
 }
