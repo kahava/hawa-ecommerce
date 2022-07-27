@@ -21,11 +21,17 @@ import Image from 'next/image';
 import { Store } from '../../utils/store';
 import { useSnackbar } from 'notistack';
 import axios from 'axios';
-const ProductDetails = (props) => {
-  const { slug } = props;
-  const { cart, dispatch } = useContext(Store);
+import { useRouter } from 'next/router';
 
-  const { enqueueSnackbar, closeSnackbar } = useSnackbar();
+const ProductDetails = (props) => {
+  const router = useRouter();
+  const { slug } = props;
+  const {
+    state: { cart },
+    dispatch,
+  } = useContext(Store);
+
+  const { enqueueSnackbar } = useSnackbar();
   const [state, setState] = useState({
     product: null,
     loading: true,
@@ -49,6 +55,8 @@ const ProductDetails = (props) => {
     };
     fetchData();
   }, []);
+  console.log('Anna', product);
+  console.log('safina', cart.cartItems);
 
   const addToCartHandler = async () => {
     const existItem = cart.cartItems.find((x) => x._id === product._id);
@@ -70,10 +78,12 @@ const ProductDetails = (props) => {
         quantity,
       },
     });
-
+    console.log(cart.cartItems);
     enqueueSnackbar(`${product.name} added to the cart`, {
       variant: 'success',
     });
+
+    router.push(`/cart`);
   };
 
   return (
@@ -84,7 +94,7 @@ const ProductDetails = (props) => {
         <Alert variant="error">{error}</Alert>
       ) : (
         <Box>
-          <Box sx={classes.section}>
+          <Box item sx={classes.section}>
             <NextLink href="/" passHref>
               <Link>
                 <Typography>back to result</Typography>
@@ -102,7 +112,7 @@ const ProductDetails = (props) => {
               />
             </Grid>
 
-            <Grid md={3} xs={12}>
+            <Grid item md={3} xs={12}>
               <List>
                 <ListItem>
                   <Typography component="h1" variant="h1">
